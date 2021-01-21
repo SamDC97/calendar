@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -18,5 +18,5 @@ public class CalendarEntity {
     private Long id;
     private Long circuitId;
     private Long orderInCalendar;
-    private Long dateOfRace;
+    private LocalDate dateOfRace;
 }

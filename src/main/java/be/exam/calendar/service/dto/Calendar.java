@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -13,7 +13,7 @@ public class Calendar {
 
     private Long id;
     private Long orderInCalendar;
-    private Long dateOfRace;
+    private LocalDate dateOfRace;
     private Long gpId;
 
     private Circuit circuit;

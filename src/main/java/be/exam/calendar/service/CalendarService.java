@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -38,23 +37,19 @@ public class CalendarService {
     @Value("${url.circuitId}")
     private String gpIdURL;
 
-    public void addCalendar(Calendar calendar){
-        calendarRepository.save(calendarMapper.toEntity(calendar));
-    }
-
     public List<Calendar> generateCalendar(){
         
         try{
             List<Circuit> circuitList = getListOfCircuits();
 
             // TODO: add dates to Calendar or find a way to save them to GP.
-            List<Long> listOfDates = generateRandomDates(Long.valueOf(circuitList.size()));
+            List<LocalDate> listOfDates = generateRandomDates(circuitList.size());
 
             List<Calendar> calendarList = new ArrayList<>();
             Collections.shuffle(circuitList);
 
             for (int i = 0; i < circuitList.size(); i++){
-                Long index = Long.valueOf(i);
+                Long index = (long) i;
 
                 Calendar calendar = new Calendar(index, index + 1, listOfDates.get(i),circuitList.get(i).getId(), circuitList.get(i));
                 calendarRepository.save(calendarMapper.toEntity(calendar));
@@ -99,23 +94,11 @@ public class CalendarService {
         }
     }
 
-    // Generates a random day and than calculates the rest of the schedule
-    private List<Long> generateRandomDates(Long numberOfDatesNeeded){
-        List<Long> listOfDates = new ArrayList<>();
-
-        LocalDate startDate = LocalDate.of(2021, 1, 1); //start date
-        Long start = startDate.toEpochDay();
-        LocalDate endDate = LocalDate.of(2021, 3, 1); //end date
-        Long end = endDate.toEpochDay();
-
-        Long randomDay = ThreadLocalRandom.current().longs(start, end).findAny().getAsLong();
-        System.out.println(LocalDate.ofEpochDay(randomDay)); // random date between the range
-
-        for (int i = 0; i < numberOfDatesNeeded; i++){
-            randomDay = randomDay + 14;
-            listOfDates.add(randomDay);
+    private List<LocalDate> generateRandomDates(int numberOfDatesNeeded){
+        List<LocalDate> listOfDates = new ArrayList<>();
+        for (int i = 0; i < numberOfDatesNeeded; i++) {
+            listOfDates.add(LocalDate.now().plusWeeks(i));
         }
-
         return listOfDates;
     }
 
