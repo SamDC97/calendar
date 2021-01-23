@@ -23,7 +23,7 @@ public class CalendarResource {
         return new ResponseEntity<>(calendarService.generateCalendar(), HttpStatus.OK);
     }
 
-    @GetMapping("/calendar")
+    @GetMapping("/calendars")
     public ResponseEntity<List<Calendar>> getCalendar(){
         return new ResponseEntity<>(calendarService.getCalendar(), HttpStatus.OK);
     }
