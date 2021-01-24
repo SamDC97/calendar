@@ -14,7 +14,7 @@ public class Calendar {
     private Long id;
     private Long orderInCalendar;
     private LocalDate dateOfRace;
-    private Long gpId;
+    private Long circuitId;
 
     private Circuit circuit;
 }

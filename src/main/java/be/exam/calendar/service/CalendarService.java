@@ -79,7 +79,7 @@ public class CalendarService {
                 .map(c -> calendarMapper.toDTO(c))
                 .collect(Collectors.toList());
         for (Calendar calendar : calendarList){
-            calendar.setCircuit(getRESTCircuit(calendar.getGpId()));
+            calendar.setCircuit(getRESTCircuit(calendar.getCircuitId()));
         }
         return calendarList;
     }

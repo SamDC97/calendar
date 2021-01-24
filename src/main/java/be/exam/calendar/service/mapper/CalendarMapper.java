@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class CalendarMapper {
 
     public CalendarEntity toEntity(Calendar calendar){
-        return new CalendarEntity(calendar.getId(), calendar.getGpId(), calendar.getOrderInCalendar(), calendar.getDateOfRace());
+        return new CalendarEntity(calendar.getId(), calendar.getCircuitId(), calendar.getOrderInCalendar(), calendar.getDateOfRace());
     }
 
     public Calendar toDTO(CalendarEntity calendarEntity){
