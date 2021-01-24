@@ -37,21 +37,17 @@ public class CalendarService {
     @Value("${url.circuitId}")
     private String gpIdURL;
 
-    public List<Calendar> generateCalendar(){
+    public List<Calendar> generateCalendar(int numberOfRaces){
         
         try{
-            List<Circuit> circuitList = getListOfCircuits();
-
-            // TODO: add dates to Calendar or find a way to save them to GP.
-            List<LocalDate> listOfDates = generateRandomDates(circuitList.size());
-
+            List<Circuit> listOfUniqueCircuits = getListOfCircuits();
+            List<Circuit> circuitList = new ArrayList<>();
             List<Calendar> calendarList = new ArrayList<>();
-            Collections.shuffle(circuitList);
+            for (int i = 1; i <= numberOfRaces; i++) {
 
-            for (int i = 0; i < circuitList.size(); i++){
-                Long index = (long) i;
-
-                Calendar calendar = new Calendar(index, index + 1, listOfDates.get(i),circuitList.get(i).getId(), circuitList.get(i));
+                List<LocalDate> listOfDates = generateRandomDates(numberOfRaces);
+                Long circuitId = getCircuitId(i, listOfUniqueCircuits);
+                Calendar calendar = new Calendar((long)i, (long)i, listOfDates.get(i-1), circuitId, getCircuit(circuitId, listOfUniqueCircuits));
                 calendarRepository.save(calendarMapper.toEntity(calendar));
                 calendarList.add(calendar);
             }
@@ -60,6 +56,24 @@ public class CalendarService {
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private Circuit getCircuit(Long circuitId, List<Circuit> circuitList) {
+        for (Circuit circuit : circuitList){
+            if (circuit.getId() == circuitId){
+                return circuit;
+            }
+        }
+        return null;
+    }
+
+    private Long getCircuitId(int index, List<Circuit> listOfUniqueCircuits) {
+        try{
+            return listOfUniqueCircuits.get(index).getId();
+        } catch (IndexOutOfBoundsException e){
+            int newIndex = index - listOfUniqueCircuits.size();
+            return getCircuitId(newIndex, listOfUniqueCircuits);
         }
     }
 
