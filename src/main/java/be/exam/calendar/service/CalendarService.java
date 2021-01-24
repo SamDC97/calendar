@@ -3,6 +3,7 @@ package be.exam.calendar.service;
 import be.exam.calendar.domain.repository.CalendarRepository;
 import be.exam.calendar.service.dto.Calendar;
 import be.exam.calendar.service.dto.Circuit;
+import be.exam.calendar.service.dto.Race;
 import be.exam.calendar.service.mapper.CalendarMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +36,9 @@ public class CalendarService {
     @Value("${url.allCircuits}")
     private String allCircuitsURL;
     @Value("${url.circuitId}")
-    private String gpIdURL;
+    private String circuitIdURL;
+    @Value("${url.generateRace}")
+    private String generateRaceURL;
 
     public List<Calendar> generateCalendar(int numberOfRaces){
         
@@ -47,7 +50,7 @@ public class CalendarService {
 
                 List<LocalDate> listOfDates = generateRandomDates(numberOfRaces);
                 Long circuitId = getCircuitId(i, listOfUniqueCircuits);
-                Calendar calendar = new Calendar((long)i, (long)i, listOfDates.get(i-1), circuitId, getCircuit(circuitId, listOfUniqueCircuits));
+                Calendar calendar = new Calendar((long)i, (long)i, listOfDates.get(i-1), circuitId, generateRace(),getCircuit(circuitId, listOfUniqueCircuits));
                 calendarRepository.save(calendarMapper.toEntity(calendar));
                 calendarList.add(calendar);
             }
@@ -57,6 +60,36 @@ public class CalendarService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public List<Calendar> getCalendar(){
+        List<Calendar> calendarList = StreamSupport.stream(calendarRepository.findAll().spliterator(), false)
+                .map(c -> calendarMapper.toDTO(c))
+                .collect(Collectors.toList());
+        for (Calendar calendar : calendarList){
+            calendar.setCircuit(getRESTCircuit(calendar.getCircuitId()));
+        }
+        return calendarList;
+    }
+
+    private Long generateRace() {
+        List<Race> raceList = new ArrayList<>();
+        ResponseEntity<List<Race>> raceListEntity = restTemplate.exchange(generateRaceURL + 1, HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<Race>>() {}, Collections.emptyMap());
+        if (raceListEntity.getStatusCode() == HttpStatus.OK) {
+            raceList= raceListEntity.getBody();
+        }
+        return raceList.get(0).getId();
+
+        //try{
+       //     URI raceURI = new URI(generateRaceURL + 1);
+        //    Race[] races = restTemplate.getForObject(raceURI, Race[].class);
+       //
+       //     return races;
+       // } catch (URISyntaxException e) {
+       //     e.printStackTrace();
+        //    return null;
+       // }
     }
 
     private Circuit getCircuit(Long circuitId, List<Circuit> circuitList) {
@@ -78,7 +111,6 @@ public class CalendarService {
     }
 
     private List<Circuit> getListOfCircuits() throws URISyntaxException {
-        URI gpURI = new URI(allCircuitsURL);
         List<Circuit> circuitList = new ArrayList<>();
         ResponseEntity<List<Circuit>> circuitListEntity = restTemplate.exchange(allCircuitsURL, HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<Circuit>>() {}, Collections.emptyMap());
@@ -88,19 +120,9 @@ public class CalendarService {
         return circuitList;
     }
 
-    public List<Calendar> getCalendar(){
-        List<Calendar> calendarList = StreamSupport.stream(calendarRepository.findAll().spliterator(), false)
-                .map(c -> calendarMapper.toDTO(c))
-                .collect(Collectors.toList());
-        for (Calendar calendar : calendarList){
-            calendar.setCircuit(getRESTCircuit(calendar.getCircuitId()));
-        }
-        return calendarList;
-    }
-
     private Circuit getRESTCircuit(Long id){
         try{
-            URI circuitURI = new URI(gpIdURL + id);
+            URI circuitURI = new URI(circuitIdURL + id);
             return restTemplate.getForObject(circuitURI, Circuit.class);
         } catch (URISyntaxException e) {
             e.printStackTrace();
@@ -115,5 +137,4 @@ public class CalendarService {
         }
         return listOfDates;
     }
-
 }

@@ -19,4 +19,5 @@ public class CalendarEntity {
     private Long circuitId;
     private Long orderInCalendar;
     private LocalDate dateOfRace;
+    private Long raceId;
 }
